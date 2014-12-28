@@ -18,7 +18,7 @@
     #define THREAD_JOIN(T) pthread_join(T, NULL)
     #define THREAD_DESTROY(T)
 
-#elif WIN32
+#elif _WIN32
     #include <windows.h>
 
     #define THREAD_T HANDLE

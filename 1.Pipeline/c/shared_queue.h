@@ -26,7 +26,7 @@
     #define SEM_DOWN(S)    sem_wait(&S)
     #define SEM_DESTROY(S) sem_close(&S)
 
-#elif WIN32
+#elif _WIN32
     #include <limits.h>
     #include <windows.h>
 
