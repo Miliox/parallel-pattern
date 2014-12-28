@@ -21,18 +21,8 @@ int shared_queue_init(
     MUTEX_T mutex;
     MUTEX_INIT(mutex);
 
-    if (mutex == NULL) {
-        free(buffer);
-        return SQ_NO_RESOURCE;
-    }
-
     SEM_T sem;
     SEM_INIT(sem);
-
-    if (sem == NULL) {
-        free(buffer);
-        MUTEX_DESTROY(mutex);
-    }
 
     queue->size = size + 1;
     queue->first = 0;

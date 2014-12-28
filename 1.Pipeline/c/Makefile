@@ -1,6 +1,6 @@
 # Original: http://www.cs.swarthmore.edu/~newhall/unixhelp/howto_makefiles.html
 # the compiler: gcc for C program, define as g++ for C++
-CC = clang
+CC = gcc -std=c99
 
 # compiler flags:
 #  -g    adds debugging information to the executable file
@@ -9,7 +9,11 @@ CC = clang
 #  -Werror make all warnings into errors.
 CFLAGS = -g -Wall -Wextra -Werror
 
+ifeq ($(OS), Windows_NT)
 LDFLAGS =
+else
+LDFLAGS = -pthread
+endif
 
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)

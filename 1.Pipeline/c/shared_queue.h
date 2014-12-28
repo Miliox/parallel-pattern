@@ -8,20 +8,23 @@
 #ifndef __SHARED_QUEUE_H__
 #define __SHARED_QUEUE_H__
 
-#ifdef LINUX
+#ifdef __unix__
+    #include <semaphore.h>
+    #include <stdlib.h>
+    #include <string.h>
     #include <pthread.h>
 
-    #define MUTEX_T pthread_mutex_t
-    #define MUTEX_INIT(M)    M = (pthread_mutex_init(&M, NULL) == 0) ? M : NULL
+    #define MUTEX_T          pthread_mutex_t
+    #define MUTEX_INIT(M)    pthread_mutex_init(&M, NULL)
     #define MUTEX_LOCK(M)    pthread_mutex_lock(&M)
     #define MUTEX_UNLOCK(M)  pthread_mutex_unlock(&M)
     #define MUTEX_DESTROY(M) pthread_mutex_destroy(&M)
 
-    #define SEM_T HANDLE
-    #define SEM_INIT(CV)
-    #define SEM_SIGNAL(CV)
-    #define SEM_WAIT(CV)
-    #define SEM_DESTROY(CV)
+    #define SEM_T          sem_t
+    #define SEM_INIT(S)    sem_init(&S, 0, 0)
+    #define SEM_UP(S)      sem_post(&S)
+    #define SEM_DOWN(S)    sem_wait(&S)
+    #define SEM_DESTROY(S) sem_close(&S)
 
 #elif WIN32
     #include <limits.h>

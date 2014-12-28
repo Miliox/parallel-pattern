@@ -8,8 +8,15 @@
 #ifndef __PIPELINE_H__
 #define __PIPELINE_H__
 
-#ifdef LINUX
+#ifdef __unix__
     #include <pthread.h>
+
+    #define THREAD_T pthread_t
+    #define THREAD_FUNC(N, P) void* N (void* P)
+
+    #define THREAD_INIT(T, F, P) pthread_create(&T, NULL, F, P)
+    #define THREAD_JOIN(T) pthread_join(T, NULL)
+    #define THREAD_DESTROY(T)
 
 #elif WIN32
     #include <windows.h>
@@ -19,7 +26,7 @@
 
     #define THREAD_INIT(T, F, P) T = CreateThread(NULL, 0, F, P, 0, NULL)
     #define THREAD_JOIN(T) WaitForSingleObject(T, INFINITE)
-    #define THREAD_DESTROY CloseHandle(T)
+    #define THREAD_DESTROY(T) CloseHandle(T)
 #else
 #endif
 
