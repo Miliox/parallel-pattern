@@ -9,19 +9,35 @@
 #define __SHARED_QUEUE_H__
 
 #ifdef LINUX
-#include <pthread.h>
-#define MUTEX_T pthread_mutex_t
-#define MUTEX_INIT(M) M = (pthread_mutex_init(&M, NULL) == 0) ? M : NULL
-#define MUTEX_LOCK(M) pthread_mutex_lock(&M)
-#define MUTEX_UNLOCK(M) pthread_mutex_unlock(&M)
-#define MUTEX_DESTROY(M) CloseHandle(M)
+    #include <pthread.h>
+
+    #define MUTEX_T pthread_mutex_t
+    #define MUTEX_INIT(M)    M = (pthread_mutex_init(&M, NULL) == 0) ? M : NULL
+    #define MUTEX_LOCK(M)    pthread_mutex_lock(&M)
+    #define MUTEX_UNLOCK(M)  pthread_mutex_unlock(&M)
+    #define MUTEX_DESTROY(M) pthread_mutex_destroy(&M)
+
+    #define SEM_T HANDLE
+    #define SEM_INIT(CV)
+    #define SEM_SIGNAL(CV)
+    #define SEM_WAIT(CV)
+    #define SEM_DESTROY(CV)
+
 #elif WIN32
-#include <windows.h>
-#define MUTEX_T HANDLE
-#define MUTEX_INIT(M) M = CreateMutex(NULL, FALSE, NULL)
-#define MUTEX_LOCK(M) WaitForSingleObject(M, INFINITE)
-#define MUTEX_UNLOCK(M) ReleaseMutex(M)
-#define MUTEX_DESTROY(M)
+    #include <limits.h>
+    #include <windows.h>
+
+    #define MUTEX_T HANDLE
+    #define MUTEX_INIT(M)    M = CreateMutex(NULL, FALSE, NULL)
+    #define MUTEX_LOCK(M)    WaitForSingleObject(M, INFINITE)
+    #define MUTEX_UNLOCK(M)  ReleaseMutex(M)
+    #define MUTEX_DESTROY(M) CloseHandle(M)
+
+    #define SEM_T HANDLE
+    #define SEM_INIT(S)    S = CreateSemaphore(NULL, 0, INT_MAX, NULL)
+    #define SEM_UP(S)      ReleaseSemaphore(S, 1, NULL)
+    #define SEM_DOWN(S)    WaitForSingleObject(S, INFINITE)
+    #define SEM_DESTROY(S) CloseHandle(S)
 #else
 #endif
 
@@ -39,17 +55,16 @@ typedef struct shared_queue
     void   *elements;
 
     MUTEX_T mutex;
+    SEM_T sem;
 } shared_queue_t;
 
 int shared_queue_init(
     shared_queue_t *queue, int size, size_t element_size);
 
 int shared_queue_put(shared_queue_t *queue, void *element);
-
 int shared_queue_pop(shared_queue_t *queue, void *element);
 
 int shared_queue_is_empty(shared_queue_t *queue);
-
 int shared_queue_is_full(shared_queue_t *queue);
 
 int shared_queue_destroy(shared_queue_t *queue);

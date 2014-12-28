@@ -10,37 +10,43 @@
 
 #include <stdio.h>
 
-int main(int argc, char ** argv) {
-    shared_queue_t q;
-    shared_queue_init(&q, 5, sizeof(int));
+#define N 100
 
-    if (!shared_queue_is_empty(&q))
-        printf("queue is not empty");
+THREAD_FUNC(enqueue_thread_main, param) {
+    shared_queue_t * q = param;
 
-    shared_queue_put(&q, &(int){1});
-    shared_queue_put(&q, &(int){2});
-    shared_queue_put(&q, &(int){3});
-    shared_queue_put(&q, &(int){4});
-    shared_queue_put(&q, &(int){5});
+    for (int i = 0; i < N; i++) {
+        printf("put %d\n", i);
+        shared_queue_put(q, &i);
+    }
 
-    if (!shared_queue_is_full(&q))
-        printf("queue is not full");
+    return 0;
+}
+
+THREAD_FUNC(dequeue_thread_main, param) {
+    shared_queue_t * q = param;
 
     int v = 0;
+    for (int i = 0; i < N; i++) {
+        shared_queue_pop(q, &v);
+        printf("pop %d\n", v);
+    }
 
-    shared_queue_pop(&q, &v);
-    printf(" %d", v);
-    shared_queue_pop(&q, &v);
-    printf(" %d", v);
-    shared_queue_pop(&q, &v);
-    printf(" %d", v);
-    shared_queue_pop(&q, &v);
-    printf(" %d", v);
-    shared_queue_pop(&q, &v);
-    printf(" %d", v);
+    return 0;
+}
 
-    if (!shared_queue_is_empty(&q))
-        printf("queue is not empty");
+int main(int argc, char ** argv) {
+    shared_queue_t q;
+    shared_queue_init(&q, N, sizeof(int));
+
+    THREAD_T enqueue_thread;
+    THREAD_T dequeue_thread;
+
+    THREAD_INIT(enqueue_thread, enqueue_thread_main, &q);
+    THREAD_INIT(dequeue_thread, dequeue_thread_main, &q);
+
+    THREAD_JOIN(enqueue_thread);
+    THREAD_JOIN(dequeue_thread);
 
     shared_queue_destroy(&q);
     return 0;
